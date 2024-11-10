@@ -154,8 +154,72 @@ def insert_customer(id, name, email, pwd, gender, phone, genres) :
         cur.close()
 
 def update_customer(id, target, value) :
-    # TODO
+    try:
+        cur = conn.cursor()
 
+        cur.execute("SET search_path to s_2020")
+
+        sql_update = None
+        # Update customer information based on target field
+        if target == 'email':
+            sql_update = """
+            UPDATE customer
+            SET email = %(value)s
+            WHERE c_id = %(id)s;
+            """
+        elif target == 'password':
+            sql_update = """
+            UPDATE customer
+            SET pwd = %(value)s
+            WHERE c_id = %(id)s;
+            """
+        elif target == 'phone':
+            sql_update = """
+            UPDATE customer
+            SET phone = %(value)s
+            WHERE c_id = %(id)s;
+            """
+        elif target == 'genres':
+            # First, delete existing genre preferences for the customer
+            sql_delete_genres = """
+            DELETE FROM prefer
+            WHERE c_id = %(id)s;
+            """
+            cur.execute(sql_delete_genres, {"id": id})
+
+            # Then, insert new genre preferences
+            for genre in value:
+                sql_genre_check = """
+                SELECT gr_id FROM genre WHERE gr_name = %(genre)s;
+                """
+                cur.execute(sql_genre_check, {"genre": genre})
+                genre_row = cur.fetchone()
+                if not genre_row:
+                    raise ValueError(f"Genre '{genre}' does not exist in the genre table.")
+
+                sql_insert_genre = """
+                INSERT INTO prefer (c_id, gr_id)
+                SELECT %(c_id)s, gr_id FROM genre WHERE gr_name = %(genre)s;
+                """
+                cur.execute(sql_insert_genre, {"c_id": id, "genre": genre})
+
+        else:
+            print(f"Error: Invalid target field '{target}' for update.")
+            return
+
+        # Execute the update for non-genre fields
+        if sql_update:
+            cur.execute(sql_update, {"id": id, "value": value})
+
+        conn.commit()
+        print(f"Customer {id} successfully updated.")
+
+    except Exception as err:
+        conn.rollback()
+        print(f"Error while updating customer: {err}")
+
+    finally:
+        cur.close()
 def delete_customer(id) :
     # TODO
 
