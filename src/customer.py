@@ -115,7 +115,43 @@ def display_info(search_type, search_value):
     pass
 
 def insert_customer(id, name, email, pwd, gender, phone, genres) :
-    # TODO
+    try:
+        cur = conn.cursor()
+
+        cur.execute("SET search_path to s_2020")
+
+        # Insert into customer table
+        sql_customer = """
+        INSERT INTO customer (c_id, c_name, email, pwd, gender, phone)
+        VALUES (%(id)s, %(name)s, %(email)s, %(pwd)s, %(gender)s, %(phone)s);
+        """
+        cur.execute(sql_customer, {"id": id, "name": name, "email": email, "pwd": pwd, "gender": gender, "phone": phone})
+
+        # Insert into prefer table for genres
+        for genre in genres:
+            # Ensure the genre exists in the genre table to avoid foreign key constraint violations
+            sql_genre_check = """
+            SELECT gr_id FROM genre WHERE gr_name = %(genre)s;
+            """
+            cur.execute(sql_genre_check, {"genre": genre})
+            genre_row = cur.fetchone()
+            if not genre_row:
+                raise ValueError(f"Genre '{genre}' does not exist in the genre table.")
+
+            sql_prefer = """
+            INSERT INTO prefer (c_id, gr_id)
+            SELECT %(c_id)s, gr_id FROM genre WHERE gr_name = %(genre)s;
+            """
+            cur.execute(sql_prefer, {"c_id": id, "genre": genre})
+
+        conn.commit()
+        print(f"Customer {name} successfully inserted.")
+    except Exception as err:
+        conn.rollback()
+        print(f"Error while inserting customer: {err}")
+
+    finally:
+        cur.close()
 
 def update_customer(id, target, value) :
     # TODO
@@ -172,7 +208,7 @@ if __name__ == "__main__":
     group_info.add_argument('-i', dest='id', type=int, help='c_id of customer entity')
     group_info.add_argument('-n', dest='name', type=str, help='c_name of customer entity')
     group_info.add_argument('-g', dest='genre', type=str, help='genre which customer prefer')
-    group_info.add_argument('-a', dest='all', type=str, help='display rows with top [value]')
+    group_info.add_argument('-a', dest='all', type=int, help='display rows with top [value]')
 
     #[1-2]insert
     parser_insert = subparsers.add_parser('insert', help='Insert new customer data')
@@ -194,9 +230,11 @@ if __name__ == "__main__":
     update_group.add_argument('-ph', dest='phone', type=str, help='New phone number (use "~ ~" to include spaces)')
     update_group.add_argument('-gs', dest='genres', nargs=3, type=str, help='List of three new genres')
 
+    # TODO CLI로의 출력은 업데이트 전 정보 1번, 업데이트 후 정보 1번-> 총 2번의 출력
+
     #[1-4]delete
     parser_delete = subparsers.add_parser('delete', help='Delete customer data with associated data')
-    # TODO
+    parser_delete.add_argument('-i', dest='c_id', type=int, required=True, help='Customer ID to delete')
     
     args = parser.parse_args()
     main(args)
