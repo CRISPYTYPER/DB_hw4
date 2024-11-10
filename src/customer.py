@@ -176,7 +176,14 @@ if __name__ == "__main__":
 
     #[1-2]insert
     parser_insert = subparsers.add_parser('insert', help='Insert new customer data')
-    # TODO
+    parser_insert.add_argument('-g', nargs=3, type=str, required=True,
+                               help='List of three genres preferred by customer')
+    parser_insert.add_argument('c_id', type=int, help='Customer ID')
+    parser_insert.add_argument('c_name', type=str, help='Customer name')
+    parser_insert.add_argument('email', type=str, help='Customer email')
+    parser_insert.add_argument('password', type=str, help='Customer password')
+    parser_insert.add_argument('gender', type=str, choices=['M', 'F'], help='Customer gender (M or F)')
+    parser_insert.add_argument('phone', type=str, help='Customer phone number')
     
     #[1-3]update
     parser_update = subparsers.add_parser('update', help='Update one of customer data')

@@ -4,9 +4,9 @@ conn = None
 
 # TODO: Override connection info
 
-db_connection_str = "host=### user=### dbname=### password=### port=###"
+db_connection_str = "host=localhost user=jinsoo dbname=postgres password=cookie3456!! port=5432"
 
 try:
-    conn = conn = pg.connect(db_connection_str)
+    conn = pg.connect(db_connection_str)
 except Exception as err:
     print("Cannot Create DB Connection", err)
