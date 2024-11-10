@@ -178,16 +178,21 @@ if __name__ == "__main__":
     parser_insert = subparsers.add_parser('insert', help='Insert new customer data')
     parser_insert.add_argument('-g', nargs=3, type=str, required=True,
                                help='List of three genres preferred by customer')
-    parser_insert.add_argument('c_id', type=int, help='Customer ID')
-    parser_insert.add_argument('c_name', type=str, help='Customer name')
-    parser_insert.add_argument('email', type=str, help='Customer email')
-    parser_insert.add_argument('password', type=str, help='Customer password')
-    parser_insert.add_argument('gender', type=str, choices=['M', 'F'], help='Customer gender (M or F)')
-    parser_insert.add_argument('phone', type=str, help='Customer phone number')
+    parser_insert.add_argument('c_id', type=int, required=True, help='Customer ID')
+    parser_insert.add_argument('c_name', type=str, required=True, help='Customer name')
+    parser_insert.add_argument('email', type=str, required=True, help='Customer email')
+    parser_insert.add_argument('password', type=str, required=True, help='Customer password')
+    parser_insert.add_argument('gender', type=str, choices=['M', 'F'], required=True, help='Customer gender (M or F)')
+    parser_insert.add_argument('phone', type=str, required=True, help='Customer phone number')
     
     #[1-3]update
     parser_update = subparsers.add_parser('update', help='Update one of customer data')
-    # TODO
+    parser_update.add_argument('-i', dest='c_id', type=int, required=True, help='Customer ID to modify')
+    update_group = parser_update.add_mutually_exclusive_group(required=True)
+    update_group.add_argument('-m', dest='email', type=str, help='New email address')
+    update_group.add_argument('-p', dest='password', type=str, help='New password')
+    update_group.add_argument('-ph', dest='phone', type=str, help='New phone number (use "~ ~" to include spaces)')
+    update_group.add_argument('-gs', dest='genres', nargs=3, type=str, help='List of three new genres')
 
     #[1-4]delete
     parser_delete = subparsers.add_parser('delete', help='Delete customer data with associated data')
