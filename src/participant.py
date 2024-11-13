@@ -9,7 +9,105 @@ from helpers.utils import make_csv
 from helpers.utils import is_valid_pro
 
 def display_info(search_type, search_value):
-    # TODO
+    try:
+        cur = conn.cursor()
+
+        cur.execute("SET search_path to s_2019040591")
+
+        if search_type == 'id' :
+            sql = """
+            SELECT
+            pt.p_id,
+            pt.p_name,
+            pt.major_work,
+            STRING_AGG(DISTINCT o.ocu_name, ', ') AS profession
+            FROM participant pt
+            LEFT OUTER JOIN profession p ON pt.p_id = p.p_id
+            LEFT OUTER JOIN occupation o ON p.ocu_id = o.ocu_id
+            WHERE pt.p_id = %(id)s
+            GROUP BY pt.p_id, pt.major_work
+            ORDER BY pt.p_id ASC;
+            """
+            cur.execute(sql, {"id": search_value})
+
+        elif search_type == 'name':
+            sql = """
+            SELECT
+            pt.p_id,
+            pt.p_name,
+            pt.major_work,
+            STRING_AGG(DISTINCT o.ocu_name, ', ') AS profession
+            FROM participant pt
+            LEFT OUTER JOIN profession p ON pt.p_id = p.p_id
+            LEFT OUTER JOIN occupation o ON p.ocu_id = o.ocu_id
+            WHERE pt.p_name ILIKE %(name)s
+            GROUP BY pt.p_id, pt.major_work
+            ORDER BY pt.p_id ASC;
+            """
+            cur.execute(sql, {"name": search_value})
+
+        elif search_type == 'profession':
+            sql = """
+            SELECT
+            pt.p_id,
+            pt.p_name,
+            pt.major_work,
+            STRING_AGG(DISTINCT o.ocu_name, ', ') AS profession
+            FROM participant pt
+            LEFT OUTER JOIN profession p ON pt.p_id = p.p_id
+            LEFT OUTER JOIN occupation o ON p.ocu_id = o.ocu_id
+            WHERE pt.p_id IN (
+                SELECT pt.p_id
+                FROM participant pt
+                LEFT OUTER JOIN profession p ON pt.p_id = p.p_id
+                LEFT OUTER JOIN occupation o ON p.ocu_id = o.ocu_id
+                WHERE o.ocu_name ILIKE %(profession)s
+            )
+            GROUP BY pt.p_id, pt.major_work
+            ORDER BY pt.p_id ASC;
+            """
+            cur.execute(sql, {"profession": search_value})
+
+        elif search_type == 'all' :
+            sql = """
+            SELECT
+            pt.p_id,
+            pt.p_name,
+            pt.major_work,
+            STRING_AGG(DISTINCT o.ocu_name, ', ') AS profession
+            FROM participant pt
+            LEFT OUTER JOIN profession p ON pt.p_id = p.p_id
+            LEFT OUTER JOIN occupation o ON p.ocu_id = o.ocu_id
+            GROUP BY pt.p_id, pt.major_work
+            ORDER BY pt.p_id ASC
+            LIMIT %(all)s;
+            """
+            cur.execute(sql, {"all": search_value})
+
+        else :
+            print("can't search by", search_type)
+            return False
+
+        rows = cur.fetchall()
+        if not rows:
+            print("No results found.")
+            return False
+        else:
+            column_names = [desc[0] for desc in cur.description]
+            #
+            print_rows_to_file(column_names, rows)
+            make_csv(column_names, rows)
+            #
+            print_rows(column_names, rows)
+            return True
+
+    except Exception as err:
+        print(err)
+
+    finally:
+        cur.close()
+    # end
+    pass
 
 
 def main(args):
@@ -29,12 +127,10 @@ def main(args):
     else :
         print("Error: query command error.")
 
-    pass
-
 
 if __name__ == "__main__":
     #
-    #print_command_to_file()
+    print_command_to_file()
     #
     start = time.time()
     parser = argparse.ArgumentParser(description = """
@@ -49,7 +145,10 @@ if __name__ == "__main__":
     #info
     parser_info = subparsers.add_parser('info', help='Display target participant info')
     group_info = parser_info.add_mutually_exclusive_group(required=True)
-    # TODO
+    group_info.add_argument('-a', dest='all', type=int, help='display rows with top [value]')
+    group_info.add_argument('-i', dest='id', type=int, help='Search by p_id')
+    group_info.add_argument('-n', dest='name', type=str, help='Search by p_name')
+    group_info.add_argument('-pr', dest='profession', type=str, help='Search by profession name')
 
     args = parser.parse_args()
     main(args)
