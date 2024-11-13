@@ -60,12 +60,12 @@ def display_info(search_type, search_value):
                 STRING_AGG(DISTINCT gr.gr_name, ', ') AS preferred_genres
             FROM customer cu JOIN prefer p ON cu.c_id = p.c_id JOIN genre gr ON p.gr_id = gr.gr_id
             WHERE cu.c_id IN (
-                    SELECT cu.c_id
-                    FROM customer cu
-                    JOIN prefer p ON cu.c_id = p.c_id
-                    JOIN genre gr ON p.gr_id = gr.gr_id
-                    WHERE gr.gr_name = %(genre)s
-                    )
+                SELECT cu.c_id
+                FROM customer cu
+                JOIN prefer p ON cu.c_id = p.c_id
+                JOIN genre gr ON p.gr_id = gr.gr_id
+                WHERE gr.gr_name = %(genre)s
+                )
             GROUP BY cu.c_id, cu.c_name, cu.email, cu.gender, cu.phone
             ORDER BY cu.c_id ASC;
             """
