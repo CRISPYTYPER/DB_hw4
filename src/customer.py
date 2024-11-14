@@ -10,8 +10,6 @@ from helpers.utils import make_csv
 def display_info(search_type, search_value):
     try:
         cur = conn.cursor()
-        
-        cur.execute("SET search_path to s_2019040591")
 
         if search_type == 'id' :
             sql = """
@@ -100,8 +98,8 @@ def display_info(search_type, search_value):
         else:
             column_names = [desc[0] for desc in cur.description]
             #
-            print_rows_to_file(column_names, rows)
-            make_csv(column_names, rows)
+            # print_rows_to_file(column_names, rows)
+            # make_csv(column_names, rows)
             #
             print_rows(column_names, rows)
             return True
@@ -297,7 +295,7 @@ def main(args):
 
 if __name__ == "__main__":
     #
-    print_command_to_file()
+    # print_command_to_file()
     #
     start = time.time()
     
@@ -339,7 +337,6 @@ if __name__ == "__main__":
     update_group.add_argument('-ph', dest='phone', type=str, help='New phone number (use "~ ~" to include spaces)')
     update_group.add_argument('-gs', dest='genres', nargs=3, type=str, help='List of three new genres')
 
-    # TODO CLI로의 출력은 업데이트 전 정보 1번, 업데이트 후 정보 1번-> 총 2번의 출력
 
     #[1-4]delete
     parser_delete = subparsers.add_parser('delete', help='Delete customer data with associated data')

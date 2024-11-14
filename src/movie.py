@@ -31,7 +31,6 @@ def display_info(search_type, search_value):
     try:
         cur = conn.cursor()
 
-        cur.execute("SET search_path to s_2019040591")
         base_sql = get_common_movie_query()
 
         if search_type == 'm_id':
@@ -63,7 +62,6 @@ def display_info(search_type, search_value):
             """
             cur.execute(sql, {"type": search_value})
         elif search_type == 'start_year':
-            #TODO 명세의 "이후의 연도"가 어떤건지 질문 후 내용에 맞게 수정 필요
             sql = base_sql + """
             WHERE EXTRACT(YEAR FROM m.start_year) >= %(start_year)s
             GROUP BY m.m_id
@@ -110,8 +108,8 @@ def display_info(search_type, search_value):
         else:
             column_names = [desc[0] for desc in cur.description]
             #
-            print_rows_to_file(column_names, rows)
-            make_csv(column_names, rows)
+            # print_rows_to_file(column_names, rows)
+            # make_csv(column_names, rows)
             #
             print_rows(column_names, rows)
             return True
@@ -153,7 +151,7 @@ def main(args):
 
 if __name__ == "__main__":
     #
-    print_command_to_file()
+    # print_command_to_file()
     #
     start = time.time()
     parser = argparse.ArgumentParser(description = """

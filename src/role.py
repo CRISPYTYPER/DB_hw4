@@ -11,8 +11,6 @@ def display_info(search_type, search_value, search_role):
     try:
         cur = conn.cursor()
 
-        cur.execute("SET search_path to s_2019040591")
-
         if search_type == 'm_id' :
             sql = """
             SELECT
@@ -58,8 +56,8 @@ def display_info(search_type, search_value, search_role):
         else:
             column_names = [desc[0] for desc in cur.description]
             #
-            print_rows_to_file(column_names, rows)
-            make_csv(column_names, rows)
+            # print_rows_to_file(column_names, rows)
+            # make_csv(column_names, rows)
             #
             print_rows(column_names, rows)
             return True
@@ -84,7 +82,7 @@ def main(args):
 
 if __name__ == "__main__":
     #
-    print_command_to_file()
+    # print_command_to_file()
     #
     start = time.time()
     parser = argparse.ArgumentParser(description = """
