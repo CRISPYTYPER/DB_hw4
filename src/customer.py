@@ -116,8 +116,6 @@ def insert_customer(id, name, email, pwd, gender, phone, genres) :
     try:
         cur = conn.cursor()
 
-        cur.execute("SET search_path to s_2019040591")
-
         # Insert into customer table
         sql_customer = """
         INSERT INTO customer (c_id, c_name, email, pwd, gender, phone)
@@ -156,8 +154,6 @@ def update_customer(id, target, *values) :
     display_info('id', id)
     try:
         cur = conn.cursor()
-
-        cur.execute("SET search_path to s_2019040591")
 
         sql_update = None
         # Update customer information based on target field
@@ -234,8 +230,6 @@ def delete_customer(id) :
     display_info('id', id)
     try:
         cur = conn.cursor()
-
-        cur.execute("SET search_path to s_2019040591")
 
         # Delete referencing rows in the prefer table
         sql_delete_prefer = """
